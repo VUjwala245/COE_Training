@@ -1,0 +1,35 @@
+# Handle missing values
+df["Age"].fillna(df["Age"].median(), inplace=True)
+df["Embarked"].fillna(df["Embarked"].mode()[0], inplace=True)
+df.drop(columns=["Cabin"], inplace=True)
+df.drop(columns=["Ticket", "Name"], inplace=True)
+# Encode categorical variables
+label_enc = LabelEncoder()
+df["Sex"] = label_enc.fit_transform(df["Sex"])
+df["Embarked"] = label_enc.fit_transform(df["Embarked"])
+ 
+X = df.drop(columns=["Survived"])
+y = df["Survived"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=20)
+ 
+dt_model = DecisionTreeClassifier(criterion="gini", random_state=42)
+dt_model.fit(X_train, y_train)
+ 
+y_pred = dt_model.predict(X_test)
+ 
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy:.2f}")
+ 
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+ 
+plt.figure(figsize=(5,5))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt="d", cmap="Blues")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+ 
+plt.figure(figsize=(15,10))
+plot_tree(dt_model, feature_names=X.columns, class_names=["Died", "Survived"], filled=True)
+plt.show()
+ 
